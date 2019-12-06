@@ -1,6 +1,7 @@
 # bookstore
 数据库期末作业
 
+[助教项目链接](https://github.com/DaSE-DBMS/bookstore)
 
 
 (以得分为导向)

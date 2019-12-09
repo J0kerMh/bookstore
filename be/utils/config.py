@@ -3,7 +3,7 @@
 # @Author  : yhma
 # @contact: yhma.dev@outlook.com
 # @Time    : 2019/12/3 16:08
-# @File    : param.py
+# @File    : config.py
 
 
 #RESPONSE CODE
@@ -13,3 +13,4 @@ FAIL = 401
 
 #RESPONSE MESSAGE
 
+SECRET_KEY = 'yhma'

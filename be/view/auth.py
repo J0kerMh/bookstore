@@ -5,10 +5,15 @@
 # @Time    : 2019/12/3 15:38
 # @File    : auth.py
 from flask import Blueprint, session, escape, request, jsonify
-from werkzeug.security import check_password_hash, generate_password_hash
-from be.db.user import User
-from be import db
-from be.utils.param import *
+from werkzeug.security import generate_password_hash, check_password_hash
+import be as app
+from be.utils.config import *
+from be.utils.resp import generate_resp
+from be.utils.token import *
+
+db = app.db
+User = app.User
+
 
 bp = Blueprint('auth', __name__)
 
@@ -35,7 +40,7 @@ def add_user():
         hashed_pwd = generate_password_hash(password)
         new_user = User(user_id, hashed_pwd)
         db.session.add(new_user)
-        db.session.commmit()
+        db.session.commit()
         resp = jsonify(message='ok')
         resp.status_code = SUCCESS
         return resp
@@ -46,18 +51,19 @@ def unregister():
     json = request.form
     user_id = json['user_id']
     password = json['password']
-    hashed_pwd = generate_password_hash(password)
-    user = User.query.filter_by(user_id=user_id, password=hashed_pwd).first()
-    if user:
-        resp = jsonify(message="注销失败，用户名不存在或密码不正确")
+    user = User.query.filter_by(user_id=user_id).first()
+    if user is None:
+        resp = jsonify(message="注销失败，用户名不存在")
         resp.status_code = FAIL
-        return resp
+    elif check_password_hash(user.password, password):
+        resp = jsonify(message="注销失败，密码不正确")
+        resp.status_code = FAIL
     else:
         db.session.delete(user)
         db.session.commmit()
         resp = jsonify(message='ok')
         resp.status_code = SUCCESS
-        return resp
+    return resp
 
 
 # @bp.errorhandler(404)
@@ -72,31 +78,57 @@ def unregister():
 #     return resp
 
 
-@bp.route('/login')
+@bp.route('/login', methods=['POST'])
 def login():
     json = request.form
     user_id = json['user_id']
     password = json['password']
     terminal = json['terminal']
-    hashed_pwd = generate_password_hash(password)
-    user = User.query.filter_by(user_id=user_id, password=hashed_pwd).first()
-    if user:
-        resp = jsonify(message="登录，用户名或密码错误")
+    user = User.query.filter_by(user_id=user_id).first()
+    if user is None:
+        resp = jsonify(message="登录失败，用户名不存在!")
         resp.status_code = FAIL
-        return resp
+    elif not check_password_hash(user.password, password):
+        resp = jsonify(message="登录失败，密码错误")
+        resp.status_code = FAIL
     else:
-        session['user_id'] = user_id
-
+        token = jwt_encode(user_id, terminal)
+        user.terminal = terminal
+        user.token = token
+        db.session.commit()
+        resp = jsonify(message="ok", token=token)
+        resp.status_code = SUCCESS
     return resp
 
 
-@bp.route('/logout')
+@bp.route('/logout', methods=['POST'])
 def logout():
-    # remove the username from the session if it's there
-    # session.popitem('name')
-    session.pop('name', None)
-    ret = 'You have logout !'
-    resp = jsonify(ret)
-    resp.status_code = 200
-    # redirect(url_for('login'))
+    token = request.headers.get('token')
+    user_id = request.json.get("user_id", "")
+    user = User.query.filter_by(user_id=user_id, token=token).first()
+    if user:
+        user.token = None
+        db.session.commit()
+        resp = jsonify(message="ok")
+        resp.status_code = SUCCESS
+    else:
+        resp = jsonify(message="登出失败, 用户名或token错误")
+        resp.status_code = FAIL
+    return resp
+
+
+@bp.route('/password', methods=['POST'])
+def change_pwd():
+    json = request.form
+    user_id = json['user_id']
+    old_password = json['oldPassword']
+    new_password = json['newPassword']
+    old_hashed_pwd = generate_password_hash(old_password)
+    user = User.query.filter_by(user_id=user_id, password=old_hashed_pwd).first()
+    if user:
+        user.password = generate_password_hash(new_password)
+        db.session.commit()
+        resp = generate_resp(SUCCESS, "ok")
+    else:
+        resp = generate_resp(FAIL, "修改失败, 用户名或密码错误")
     return resp

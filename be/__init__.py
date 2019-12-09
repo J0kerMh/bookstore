@@ -30,11 +30,27 @@ def create_app(test_config=None):
 
     @application.route('/hello')
     def hello():
-        # be.create_all()
+        db.create_all()
         return 'Hello, World!'
 
     # apply the blueprints to the application
     # TODO set buleprits
     from be.view import auth
     application.register_blueprint(auth.bp, url_prefix='/auth')
+
+    # application.register_blueprint(auth.bp, url_prefix='/auth')
     return application
+
+
+class User(db.Model):
+    __tablename__ = 'user'
+    user_id = db.Column(db.String(100), nullable=False, unique=True, primary_key=True)
+    password = db.Column(db.String(100), nullable=False)
+    terminal = db.Column(db.String(100), nullable=True)
+    token = db.Column(db.String(100), nullable=True)
+
+    def __init__(self, user_id, password, terminal=None, token=None):
+        self.user_id = user_id
+        self.password = password
+        self.terminal = terminal
+        self.token = token

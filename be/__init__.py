@@ -45,9 +45,9 @@ def create_app(test_config=None):
 class User(db.Model):
     __tablename__ = 'user'
     user_id = db.Column(db.String(100), nullable=False, unique=True, primary_key=True)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
     terminal = db.Column(db.String(100), nullable=True)
-    token = db.Column(db.String(100), nullable=True)
+    token = db.Column(db.String(1000), nullable=True)
 
     def __init__(self, user_id, password, terminal=None, token=None):
         self.user_id = user_id

@@ -18,6 +18,9 @@ def jwt_encode(user_id, terminal):
     return encoded.decode("utf-8")
 
 
-def jwt_decode(encoded_token, user_id):
-    decoded = jwt.decode(encoded_token, key=SECRET_KEY, algorithms="HS256")
-    return decoded
+def jwt_decode(encoded_token):
+    try:
+        decoded = jwt.decode(encoded_token, key=SECRET_KEY, algorithms="HS256")
+        return decoded
+    except Exception as e:
+        return None

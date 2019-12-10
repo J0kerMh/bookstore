@@ -18,22 +18,14 @@ User = app.User
 bp = Blueprint('auth', __name__)
 
 
-@bp.route('/')
-def index():
-    if 'name' in session:
-        return 'Logged in as %s' % escape(session['name'])
-    return 'You are not logged in'
-
-
 @bp.route('/register', methods=['POST'])
 def add_user():
-    json = request.form
+    json = request.json
     user_id = json['user_id']
     password = json['password']
 
     if User.query.filter_by(user_id=user_id).first():
-        resp = jsonify(message="注册失败, 用户名重复")
-        resp.status_code = FAIL
+        resp = generate_resp(FAIL, '注册失败, 用户名重复')
         return resp
     else:
         # TODO 数据库插入是否要增加异常判断?
@@ -41,28 +33,24 @@ def add_user():
         new_user = User(user_id, hashed_pwd)
         db.session.add(new_user)
         db.session.commit()
-        resp = jsonify(message='ok')
-        resp.status_code = SUCCESS
+        resp = generate_resp(SUCCESS, 'ok')
         return resp
 
 
 @bp.route('/unregister', methods=['POST'])
 def unregister():
-    json = request.form
+    json = request.json
     user_id = json['user_id']
     password = json['password']
     user = User.query.filter_by(user_id=user_id).first()
     if user is None:
-        resp = jsonify(message="注销失败，用户名不存在")
-        resp.status_code = FAIL
-    elif check_password_hash(user.password, password):
-        resp = jsonify(message="注销失败，密码不正确")
-        resp.status_code = FAIL
+        resp = generate_resp(FAIL, '注销失败，用户名不存在')
+    elif not check_password_hash(user.password, password):
+        resp = generate_resp(FAIL, '注销失败，密码不正确')
     else:
         db.session.delete(user)
-        db.session.commmit()
-        resp = jsonify(message='ok')
-        resp.status_code = SUCCESS
+        db.session.commit()
+        resp = generate_resp(SUCCESS, 'ok')
     return resp
 
 
@@ -77,20 +65,17 @@ def unregister():
 #
 #     return resp
 
-
 @bp.route('/login', methods=['POST'])
 def login():
-    json = request.form
+    json = request.json
     user_id = json['user_id']
     password = json['password']
     terminal = json['terminal']
     user = User.query.filter_by(user_id=user_id).first()
     if user is None:
-        resp = jsonify(message="登录失败，用户名不存在!")
-        resp.status_code = FAIL
+        resp = generate_resp(FAIL, '登录失败，用户名不存在!')
     elif not check_password_hash(user.password, password):
-        resp = jsonify(message="登录失败，密码错误")
-        resp.status_code = FAIL
+        resp = generate_resp(FAIL, '登录失败，密码错误')
     else:
         token = jwt_encode(user_id, terminal)
         user.terminal = terminal
@@ -105,30 +90,34 @@ def login():
 def logout():
     token = request.headers.get('token')
     user_id = request.json.get("user_id", "")
-    user = User.query.filter_by(user_id=user_id, token=token).first()
-    if user:
-        user.token = None
-        db.session.commit()
-        resp = jsonify(message="ok")
-        resp.status_code = SUCCESS
+    # token可能有错
+    de_token = jwt_decode(token)
+    if de_token is None:
+        resp = generate_resp(FAIL, "登出失败, token错误")
     else:
-        resp = jsonify(message="登出失败, 用户名或token错误")
-        resp.status_code = FAIL
+        terminal = de_token['terminal']
+        user = User.query.filter_by(user_id=user_id, terminal=terminal).first()
+        if user is None:
+            resp = generate_resp(FAIL, "登出失败, 用户名错误")
+        else:
+            user.token = None
+            db.session.commit()
+            resp = generate_resp(SUCCESS, 'ok')
     return resp
-
 
 @bp.route('/password', methods=['POST'])
 def change_pwd():
-    json = request.form
+    json = request.json
     user_id = json['user_id']
     old_password = json['oldPassword']
     new_password = json['newPassword']
-    old_hashed_pwd = generate_password_hash(old_password)
-    user = User.query.filter_by(user_id=user_id, password=old_hashed_pwd).first()
-    if user:
+    user = User.query.filter_by(user_id=user_id).first()
+    if user is None:
+        resp = generate_resp(FAIL, "修改失败, 用户名不存在")
+    elif not check_password_hash(user.password, old_password):
+        resp = generate_resp(FAIL, "修改失败, 密码错误")
+    else:
         user.password = generate_password_hash(new_password)
         db.session.commit()
         resp = generate_resp(SUCCESS, "ok")
-    else:
-        resp = generate_resp(FAIL, "修改失败, 用户名或密码错误")
     return resp

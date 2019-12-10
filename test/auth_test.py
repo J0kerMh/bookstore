@@ -6,10 +6,15 @@
 # @File    : auth_test.py
 import requests
 
+
 # a=requests.Session()
-# response = requests.post('http://127.0.0.1:5000/auth/login',data={'user_id':'test','password':'test','terminal':'test'})
-response = requests.post('http://127.0.0.1:5000/auth/logout',
-                         data={'user_id': 'test', 'password': 'test', 'terminal': 'test'})
+# response = requests.get('http://127.0.0.1:5000/auth/test')
+# print(response.text)
+# response = requests.post('http://127.0.0.1:5000/auth/register',json={'user_id':'test2','password':'test2'})
+# response = requests.post('http://127.0.0.1:5000/auth/unregister',json={'user_id':'test2','password':'test2'})
+
+# response = requests.post('http://127.0.0.1:5000/auth/logout',
+#                          data={'user_id': 'test', 'password': 'test', 'terminal': 'test'})
 # re= a.post('http://127.0.0.1:5000/login',data={'name':'yhma','pwd':'test'})
 # response = a.get('http://127.0.0.1:5000/user')
 #
@@ -18,4 +23,4 @@ response = requests.post('http://127.0.0.1:5000/auth/logout',
 # response = a.post('http://127.0.0.1:5000/user/opts',data={'opts':'adorn_tool','args':'general ron cloudsensei'})
 # response = a.post('http://127.0.0.1:5000/user/opts',data={'opts':'adorn_tool','args':'general ron cloudsensei'})
 # response = requests.post()
-print(response.text)
+# print(response.text)

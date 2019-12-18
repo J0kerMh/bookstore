@@ -48,9 +48,10 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     terminal = db.Column(db.String(100), nullable=True)
     token = db.Column(db.String(1000), nullable=True)
-
+    money = db.Column(db.Integer, nullable=False)
     def __init__(self, user_id, password, terminal=None, token=None):
         self.user_id = user_id
         self.password = password
         self.terminal = terminal
         self.token = token
+        self.money = 0

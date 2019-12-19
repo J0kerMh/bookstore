@@ -105,6 +105,7 @@ def logout():
             resp = generate_resp(SUCCESS, 'ok')
     return resp
 
+
 @bp.route('/password', methods=['POST'])
 def change_pwd():
     json = request.json

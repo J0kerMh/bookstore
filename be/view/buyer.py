@@ -17,6 +17,7 @@ Order = app.Order
 Goods = app.Goods
 Store = app.Store
 Buy = app.Buy
+Book=app.Book
 
 bp = Blueprint('buyer', __name__)
 
@@ -97,7 +98,7 @@ def new_order():
         json = request.json
         user_id = json['user_id']
         store_id = json['store_id']
-        book = json['book']
+        book = json['books']
         user = User.query.filter_by(user_id=user_id).first()
         store = Store.query.filter_by(store_id=store_id).first()
         if user is None:
@@ -108,7 +109,8 @@ def new_order():
             else:
                 amount = 0
                 for item in book:
-                    book_temp = Goods.query.filter_by(store_id=store_id, book_id=item['id']).first()
+                    book_id=Book.query.filter_by(book_name=item['id']).first()
+                    book_temp = Goods.query.filter_by(store_id=store_id, book_id=book_id).first()
                     if book_temp is None:
                         resp = generate_resp(BOOK_NOT_EXIST, '购买的图书不存在')
                         return resp
@@ -123,10 +125,11 @@ def new_order():
                 db.session.add(new_order_)
                 db.session.commit()
                 id_now = Order.query.filter_by().order_by(Order.order_id.desc()).first().order_id
-                print(id_now)
+                #print(id_now)
                 for item in book:
-                    id_goods = Goods.query.filter_by(store_id=store_id, book_id=item['id']).first().goods_id
-                    new_buy = Buy(id_now, item['count'], id_goods)
+                    book_id=Book.query.filter_by(book_name=item['id']).first()
+                    id_goods = Goods.query.filter_by(store_id=store_id, book_id=book_id).first().goods_id
+                    new_buy = Buy(id_now,book_id,id_goods)
                     db.session.add(new_buy)
                     db.session.commit()
                 resp = generate_resp(SUCCESS, "下单成功")

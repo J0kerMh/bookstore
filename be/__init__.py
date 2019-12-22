@@ -37,9 +37,10 @@ def create_app(test_config=None):
     # TODO set buleprits
     from be.view import auth
     from be.view import buyer
-    application.register_blueprint(auth.bp, url_prefix='/auth')
-    application.register_blueprint(buyer.bp, url_prefix='/buyer')
-
+    from be.view import seller
+    application.register_blueprint(auth.bp,url_prefix='/auth')
+    application.register_blueprint(buyer.bp,url_prefix='/buyer')
+    application.register_blueprint(seller.bp,url_prefix='/seller')
     # application.register_blueprint(auth.bp, url_prefix='/auth')
     return application
 
@@ -76,7 +77,7 @@ class Order(db.Model):
 class Buy(db.Model):
     __tablename__ = 'buy'
     order_id = db.Column(db.Integer, nullable=False, primary_key=True)
-    goods_id = db.Column(db.String(100), nullable=False, primary_key=True)
+    goods_id = db.Column(db.Integer, nullable=False, primary_key=True)
     count = db.Column(db.Integer, nullable=False)
 
     def __init__(self, order_id, count, goods_id):
@@ -89,27 +90,58 @@ class Store(db.Model):
     __tablename__ = 'store'
     store_id = db.Column(db.String(100), nullable=False, unique=True, primary_key=True)
     user_id = db.Column(db.String(100), nullable=False)
-    store_name = db.Column(db.String(100), nullable=True)
 
-    def __init__(self, user_id, store_id, store_name):
+    def __init__(self, user_id, store_id):
         self.user_id = user_id
         self.store_id = store_id
-        self.store_name = store_name
 
 
 class Goods(db.Model):
     __tablename__ = 'goods'
-    goods_id = db.Column(db.String(100), nullable=False, unique=True, primary_key=True)
-    book_id = db.Column(db.String(100), nullable=False)
+    goods_id = db.Column(db.Integer, nullable=False, unique=True, primary_key=True, autoincrement=True)
+    book_id = db.Column(db.Integer, nullable=False)
     store_id = db.Column(db.String(100), nullable=False)
-    store_name = db.Column(db.String(100), nullable=True)
     storage = db.Column(db.Integer, nullable=False)
     prize = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, goods_id, store_id, store_name, storage, prize, book_id):
-        self.goods_id = goods_id
+    def __init__(self, book_id,store_id,storage, prize):
         self.store_id = store_id
         self.book_id = book_id
-        self.store_name = store_name
         self.storage = storage
         self.prize = prize
+
+class Book(db.Model):
+    __tablename__ = 'book'
+    book_id = db.Column(db.Integer,nullable=False,unique=True,primary_key=True,autoincrement=True)
+    book_name=db.Column(db.String(100), nullable=True)
+    title = db.Column(db.String(100), nullable=True)
+    author=db.Column(db.String(100),nullable=True)
+    publisher = db.Column(db.String(100), nullable=True)
+    original_title = db.Column(db.String(100), nullable=True)
+    translator = db.Column(db.String(100), nullable=True)
+    pub_year=db.Column(db.String(100), nullable=True)
+    pages=db.Column(db.Integer, nullable=True)
+    binding=db.Column(db.String(100), nullable=True)
+    isbn=db.Column(db.String(100), nullable=True)
+
+    def __init__(self,book_name,title,author,publisher,original_title,translator,pub_year,pages,binding,isbn):
+        self.book_name=book_name
+        self.title=title
+        self.author=author
+        self.publisher=publisher
+        self.original_title=original_title
+        self.translator=translator
+        self.pub_year=pub_year
+        self.pages=pages
+        self.binding=binding
+        self.isbn=isbn
+
+class tag(db.Model):
+    __tablename__ = 'tag'
+    tag_id = db.Column(db.Integer, nullable=False, unique=True, primary_key=True, autoincrement=True)
+    tag_name = db.Column(db.String(100), nullable=False)
+    book_id = db.Column(db.Integer,nullable=False)
+
+    def __init__(self,tag_name,book_id):
+        self.tag_name=tag_name
+        self.book_id=book_id

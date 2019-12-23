@@ -85,9 +85,11 @@ def add_book():
             db.session.add_all(new_tags)
             db.session.commit()
             price = book_dir['price']
+            if price is None:
+                price = 0
             amount = json['stock_level']
             book_id = Book.query.filter_by(book_name=book_name).first().book_id
-            new_goods = Goods(book_id=book_id,store_id=store_id,storage=amount,prize=price)
+            new_goods = Goods(book_id=book_id,store_id=store_id,storage=amount, prize=price)
             db.session.add(new_goods)
             db.session.commit()
             return generate_resp(SUCCESS, "book added")
@@ -96,6 +98,8 @@ def add_book():
             Good=Goods.query.filter_by(book_id=book_id).filter_by(store_id=store_id).first()
             if Good is None:
                 price = book_dir['price']
+                if price is None:
+                    price = 0
                 amount = json['stock_level']
                 book_id = Book.query.filter_by(book_name=book_name).first().book_id
                 new_gg = Goods(book_id=book_id,store_id=store_id,storage=amount,prize=price)
@@ -104,6 +108,7 @@ def add_book():
                 return generate_resp(SUCCESS, "store has been created")
             else:
                 return generate_resp(FAIL, 'book exist')
+
 
 @bp.route("add_stock_level",methods=['POST'])
 def add_stock_level():

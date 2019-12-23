@@ -104,18 +104,19 @@ class Goods(db.Model):
     storage = db.Column(db.Integer, nullable=False)
     prize = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, book_id,store_id,storage, prize):
+    def __init__(self, book_id,store_id,storage, prize=0):
         self.store_id = store_id
         self.book_id = book_id
         self.storage = storage
         self.prize = prize
 
+
 class Book(db.Model):
     __tablename__ = 'book'
-    book_id = db.Column(db.Integer,nullable=False,unique=True,primary_key=True,autoincrement=True)
-    book_name=db.Column(db.String(100), nullable=True)
+    book_id = db.Column(db.Integer,nullable=False, unique=True, primary_key=True, autoincrement=True)
+    book_name = db.Column(db.String(100), nullable=True)
     title = db.Column(db.String(100), nullable=True)
-    author=db.Column(db.String(100),nullable=True)
+    author = db.Column(db.String(100),nullable=True)
     publisher = db.Column(db.String(100), nullable=True)
     original_title = db.Column(db.String(100), nullable=True)
     translator = db.Column(db.String(100), nullable=True)
@@ -136,12 +137,13 @@ class Book(db.Model):
         self.binding=binding
         self.isbn=isbn
 
+
 class tag(db.Model):
     __tablename__ = 'tag'
     tag_id = db.Column(db.Integer, nullable=False, unique=True, primary_key=True, autoincrement=True)
     tag_name = db.Column(db.String(100), nullable=False)
-    book_id = db.Column(db.Integer,nullable=False)
+    book_id = db.Column(db.Integer, nullable=False)
 
-    def __init__(self,tag_name,book_id):
-        self.tag_name=tag_name
-        self.book_id=book_id
+    def __init__(self, tag_name, book_id):
+        self.tag_name = tag_name
+        self.book_id = book_id

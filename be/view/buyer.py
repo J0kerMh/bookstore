@@ -8,7 +8,7 @@ from flask import Blueprint, session, escape, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import be as app
 from be.utils.config import *
-from be.utils.resp import generate_resp
+from be.utils.resp import generate_resp, generate_resp_order
 from be.utils.token import *
 
 db = app.db
@@ -17,7 +17,7 @@ Order = app.Order
 Goods = app.Goods
 Store = app.Store
 Buy = app.Buy
-Book=app.Book
+Book = app.Book
 
 bp = Blueprint('buyer', __name__)
 
@@ -109,7 +109,11 @@ def new_order():
             else:
                 amount = 0
                 for item in book:
-                    book_id=Book.query.filter_by(book_name=item['id']).first()
+                    book_id = Book.query.filter_by(book_name=item['id']).first()
+                    if book_id is None:
+                        resp = generate_resp(BOOK_NOT_EXIST, '购买的图书不存在')
+                        return resp
+                    book_id = book_id.book_id
                     book_temp = Goods.query.filter_by(store_id=store_id, book_id=book_id).first()
                     if book_temp is None:
                         resp = generate_resp(BOOK_NOT_EXIST, '购买的图书不存在')
@@ -125,12 +129,12 @@ def new_order():
                 db.session.add(new_order_)
                 db.session.commit()
                 id_now = Order.query.filter_by().order_by(Order.order_id.desc()).first().order_id
-                #print(id_now)
+                # print(id_now)
                 for item in book:
-                    book_id=Book.query.filter_by(book_name=item['id']).first()
+                    book_id = Book.query.filter_by(book_name=item['id']).first().book_id
                     id_goods = Goods.query.filter_by(store_id=store_id, book_id=book_id).first().goods_id
-                    new_buy = Buy(id_now,book_id,id_goods)
+                    new_buy = Buy(id_now, item['count'], id_goods)
                     db.session.add(new_buy)
                     db.session.commit()
-                resp = generate_resp(SUCCESS, "下单成功")
+                resp = generate_resp_order(SUCCESS, id_now)
     return resp

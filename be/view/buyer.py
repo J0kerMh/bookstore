@@ -203,7 +203,7 @@ def confirm_order():
 
 
 @bp.route('/his_order', methods=['POST'])
-def market():
+def his_order():
     token = request.headers.get('token')
     de_token = jwt_decode(token)
     if de_token is None:

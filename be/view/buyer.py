@@ -7,6 +7,8 @@
 from flask import Blueprint, session, escape, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import be as app
+import pymongo
+from bson.json_util import dumps
 from be.utils.config import *
 from be.utils.resp import generate_resp, generate_resp_order
 from be.utils.token import *
@@ -18,12 +20,19 @@ Goods = app.Goods
 Store = app.Store
 Buy = app.Buy
 Book = app.Book
+myclient = pymongo.MongoClient('mongodb://112.74.41.122:27017/database')
+db_m = myclient.bookstore
 
 bp = Blueprint('buyer', __name__)
 
 
 @bp.route('/add_funds', methods=['POST'])
 def add_funds():
+    token = request.headers.get('token')
+    de_token = jwt_decode(token)
+    if de_token is None:
+        resp = generate_resp(FAIL, "充值失败, token错误")
+        return resp
     json = request.json
     user_id = json['user_id']
     password = json['password']
@@ -47,7 +56,7 @@ def payment():
     token = request.headers.get('token')
     de_token = jwt_decode(token)
     if de_token is None:
-        resp = generate_resp(FAIL, "充值失败, token错误")
+        resp = generate_resp(FAIL, "付款失败, token错误")
         return resp
     json = request.json
     user_id = json['user_id']
@@ -94,6 +103,7 @@ def payment():
                 owner_money = owner.money
                 owner.money = owner_money + order_amount
                 order.state = 1
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': "已付款"}})
                 db.session.commit()
                 resp = generate_resp(SUCCESS, "ok")
     return resp
@@ -153,6 +163,8 @@ def new_order():
                     new_buy = Buy(id_now, item['count'], id_goods)
                     db.session.add(new_buy)
                 db.session.commit()
+                db_m.history_order.insert_one({'order_id': id_now, 'buyer': user_id, 'store': store_id, 'goods': book,
+                                               'total_amount': amount, 'state': "未付款"})
                 resp = generate_resp_order(SUCCESS, id_now)
     return resp
 
@@ -163,7 +175,7 @@ def confirm_order():
     token = request.headers.get('token')
     de_token = jwt_decode(token)
     if de_token is None:
-        resp = generate_resp(FAIL, "付款失败, token错误")
+        resp = generate_resp(FAIL, "确认失败, token错误")
     else:
         json = request.json
         user_id = json['user_id']
@@ -182,8 +194,8 @@ def confirm_order():
             if order is None:
                 resp = generate_resp(INVALID_PARAMETER, '订单号错误')
             else:
-                order.state = 3
-                # mongodb
+                # order.state = 3
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': "已完成"}})
                 db.session.delete(order)
                 db.session.commit()
                 resp = generate_resp(SUCCESS, "ok")

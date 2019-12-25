@@ -10,7 +10,7 @@ import be as app
 import pymongo
 from bson.json_util import dumps
 from be.utils.config import *
-from be.utils.resp import generate_resp, generate_resp_order
+from be.utils.resp import generate_resp, generate_resp_order, generate_resp_his_order
 from be.utils.token import *
 
 db = app.db
@@ -199,4 +199,22 @@ def confirm_order():
                 db.session.delete(order)
                 db.session.commit()
                 resp = generate_resp(SUCCESS, "ok")
+    return resp
+
+
+@bp.route('/his_order', methods=['POST'])
+def market():
+    token = request.headers.get('token')
+    de_token = jwt_decode(token)
+    if de_token is None:
+        resp = generate_resp(FAIL, "确认失败, token错误")
+    else:
+        json = request.json
+        user_id = json['user_id']
+        # 检查用户是否存在
+        user = User.query.filter_by(user_id=user_id).first()
+        if user is None:
+            resp = generate_resp(INVALID_PARAMETER, '用户名错误')
+        else:
+            resp = generate_resp_his_order(SUCCESS, dumps(db_m.history_order.find(), ensure_ascii=False))
     return resp

@@ -19,3 +19,8 @@ def generate_resp_order(code, message):
     resp.status_code = code
     return resp
 
+
+def generate_resp_his_order(code, message):
+    resp = jsonify(order=message)
+    resp.status_code = code
+    return resp

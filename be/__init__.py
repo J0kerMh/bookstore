@@ -67,11 +67,13 @@ class Order(db.Model):
     user_id = db.Column(db.String(100), nullable=False)
     state = db.Column(db.Integer, nullable=False)
     amount = db.Column(db.Integer, nullable=False)
+    time = db.Column(db.Float, nullable=False)
 
-    def __init__(self, user_id, amount, state=0):
+    def __init__(self, user_id, amount, time, state=0):
         self.user_id = user_id
         self.amount = amount
         self.state = state
+        self.time = time
 
 
 class Buy(db.Model):
@@ -104,7 +106,7 @@ class Goods(db.Model):
     storage = db.Column(db.Integer, nullable=False)
     prize = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, book_id,store_id,storage, prize=0):
+    def __init__(self, book_id, store_id, storage, prize=0):
         self.store_id = store_id
         self.book_id = book_id
         self.storage = storage
@@ -113,29 +115,29 @@ class Goods(db.Model):
 
 class Book(db.Model):
     __tablename__ = 'book'
-    book_id = db.Column(db.Integer,nullable=False, unique=True, primary_key=True, autoincrement=True)
+    book_id = db.Column(db.Integer, nullable=False, unique=True, primary_key=True, autoincrement=True)
     book_name = db.Column(db.String(100), nullable=True)
     title = db.Column(db.String(100), nullable=True)
-    author = db.Column(db.String(100),nullable=True)
+    author = db.Column(db.String(100), nullable=True)
     publisher = db.Column(db.String(100), nullable=True)
     original_title = db.Column(db.String(100), nullable=True)
     translator = db.Column(db.String(100), nullable=True)
-    pub_year=db.Column(db.String(100), nullable=True)
-    pages=db.Column(db.Integer, nullable=True)
-    binding=db.Column(db.String(100), nullable=True)
-    isbn=db.Column(db.String(100), nullable=True)
+    pub_year = db.Column(db.String(100), nullable=True)
+    pages = db.Column(db.Integer, nullable=True)
+    binding = db.Column(db.String(100), nullable=True)
+    isbn = db.Column(db.String(100), nullable=True)
 
-    def __init__(self,book_name,title,author,publisher,original_title,translator,pub_year,pages,binding,isbn):
-        self.book_name=book_name
-        self.title=title
-        self.author=author
-        self.publisher=publisher
-        self.original_title=original_title
-        self.translator=translator
-        self.pub_year=pub_year
-        self.pages=pages
-        self.binding=binding
-        self.isbn=isbn
+    def __init__(self, book_name, title, author, publisher, original_title, translator, pub_year, pages, binding, isbn):
+        self.book_name = book_name
+        self.title = title
+        self.author = author
+        self.publisher = publisher
+        self.original_title = original_title
+        self.translator = translator
+        self.pub_year = pub_year
+        self.pages = pages
+        self.binding = binding
+        self.isbn = isbn
 
 
 class tag(db.Model):

@@ -4,10 +4,11 @@
 # @contact: redpeanut@163.com
 # @Time    : 2019/12/18 12:36
 # @File    : buyer.py
-from flask import Blueprint, session, escape, request, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Blueprint, request
+from werkzeug.security import check_password_hash
 import be as app
 import pymongo
+import time
 from bson.json_util import dumps
 from be.utils.config import *
 from be.utils.resp import generate_resp, generate_resp_order, generate_resp_his_order
@@ -103,7 +104,7 @@ def payment():
                 owner_money = owner.money
                 owner.money = owner_money + order_amount
                 order.state = 1
-                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': "已付款"}})
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': 1}})
                 db.session.commit()
                 resp = generate_resp(SUCCESS, "ok")
     return resp
@@ -151,7 +152,7 @@ def new_order():
                             amount = amount + book_temp.prize * item['count']
                             continue
                 # 添加新订单
-                new_order_ = Order(user_id, amount)
+                new_order_ = Order(user_id, amount, 10)
                 db.session.add(new_order_)
                 db.session.commit()
                 id_now = Order.query.filter_by().order_by(Order.order_id.desc()).first().order_id
@@ -164,7 +165,7 @@ def new_order():
                     db.session.add(new_buy)
                 db.session.commit()
                 db_m.history_order.insert_one({'order_id': id_now, 'buyer': user_id, 'store': store_id, 'goods': book,
-                                               'total_amount': amount, 'state': "未付款"})
+                                               'total_amount': amount, 'state': 0})
                 resp = generate_resp_order(SUCCESS, id_now)
     return resp
 
@@ -195,7 +196,7 @@ def confirm_order():
                 resp = generate_resp(INVALID_PARAMETER, '订单号错误')
             else:
                 # order.state = 3
-                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': "已完成"}})
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': 3}})
                 db.session.delete(order)
                 db.session.commit()
                 resp = generate_resp(SUCCESS, "ok")
@@ -217,4 +218,64 @@ def his_order():
             resp = generate_resp(INVALID_PARAMETER, '用户名错误')
         else:
             resp = generate_resp_his_order(SUCCESS, dumps(db_m.history_order.find(), ensure_ascii=False))
+    return resp
+
+
+@bp.route('/cancel_order', methods=['POST'])
+def cancel_order():
+    # 检查token
+    token = request.headers.get('token')
+    de_token = jwt_decode(token)
+    if de_token is None:
+        resp = generate_resp(FAIL, "确认失败, token错误")
+    else:
+        json = request.json
+        user_id = json['user_id']
+        order_id = json['order_id']
+        password = json['password']
+        # 检查用户是否存在
+        user = User.query.filter_by(user_id=user_id).first()
+        if user is None:
+            resp = generate_resp(INVALID_PARAMETER, '用户名错误')
+        # 密码是否正确
+        elif not check_password_hash(user.password, password):
+            resp = generate_resp(INVALID_PARAMETER, '密码错误')
+        else:
+            order = Order.query.filter_by(order_id=order_id).first()
+            if order is None:
+                resp = generate_resp(INVALID_PARAMETER, '订单号错误')
+            else:
+                if order.state == 0:
+                    buy = Buy.query.filter_by(order_id=order_id).all()
+                    for buy_ in buy:
+                        # 删除buy中相关条目
+                        db.session.delete(buy_)
+                    db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': 2}})
+                    db.session.delete(order)
+                    db.session.commit()
+                    resp = generate_resp(SUCCESS, "ok")
+                elif order.state == 1:
+                    # 修改用户金钱
+                    money_old = user.money
+                    order_amount = order.amount
+                    user.money = money_old + order_amount
+                    order_ = db_m.history_order.find_one({'order_id': order_id})
+                    buy = order_['goods']
+                    for buy_ in buy:
+                        goods_count = buy_['count']
+                        book_name = buy_['id']
+                        book_id = Book.query.filter_by(book_name=book_name).first().book_id
+                        goods = Goods.query.filter_by(book_id=book_id, store_id=order_['store']).first()
+                        goods_count_origin = goods.storage
+                        # 修改库存量
+                        goods.storage = goods_count_origin + goods_count
+                    owner_id = Store.query.filter_by(store_id=order_['store']).first().user_id
+                    owner = User.query.filter_by(user_id=owner_id).first()
+                    # 商铺扣钱
+                    owner_money = owner.money
+                    owner.money = owner_money - order_amount
+                    db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': 2}})
+                    db.session.delete(order)
+                    db.session.commit()
+                    resp = generate_resp(SUCCESS, "ok")
     return resp

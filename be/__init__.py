@@ -70,8 +70,8 @@ class Order(db.Model):
     amount = db.Column(db.Integer, nullable=False)
     time = db.Column(db.Float, nullable=False)
 
-    def __init__(self, user_id, amount, time, seller_id, state=0):
-        self.user_id = user_id
+    def __init__(self, buyer_id, amount, time, seller_id, state=0):
+        self.buyer_id = buyer_id
         self.amount = amount
         self.state = state
         self.seller_id = seller_id

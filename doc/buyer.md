@@ -147,3 +147,122 @@ Status Code:
 200 | 充值成功
 401 | 授权失败
 5XX | 无效参数
+
+## 买家签收
+
+#### URL：
+
+POST http://[address]/buyer/take_over_goods
+
+#### Request
+
+
+
+##### Body:
+
+```json
+{
+  "user_id": "user_id",
+  "password": "password",
+  "order_id": "order_id"
+}
+```
+
+##### 属性说明：
+
+| key      | 类型   | 描述                 | 是否可为空 |
+| -------- | ------ | -------------------- | ---------- |
+| user_id  | string | 买家用户ID           | N          |
+| password | string | 用户密码             | N          |
+| order_id | int    | 充值金额，以分为单位 | N          |
+
+
+Status Code:
+
+| 码   | 描述     |
+| ---- | -------- |
+| 200  | 签收成功 |
+| 401  | 签收失败 |
+| 5XX  | 无效参数 |
+
+## 买家查看所有历史订单
+
+#### URL：
+
+GET http://[address]/buyer/history_order
+
+
+
+#### Response
+
+
+Status Code:
+
+| 码   | 描述      |
+| ---- | --------- |
+| 200  | 查看成功  |
+| 401  | token错误 |
+
+##### Body:
+
+```json
+{
+  "orders": [
+    {
+      "order_id": "1000067"
+    },
+    {
+      "order_id": "1000134"
+    }
+  ]
+}
+```
+
+##### 属性说明：
+
+| 变量名 | 类型 | 描述                           | 是否可为空 |
+| ------ | ---- | ------------------------------ | ---------- |
+| orders | dict | 历史订单列表状态码为200时有效) | N          |
+
+orders数组：
+
+| 变量名   | 类型   | 描述       | 是否可为空 |
+| -------- | ------ | ---------- | ---------- |
+| order_id | string | 历史订单号 | N          |
+
+## 买家取消订单
+
+#### URL：
+
+POST http://[address]/buyer/cancel_order
+
+#### Request
+
+
+
+##### Body:
+
+```json
+{
+  "user_id": "user_id",
+  "password": "password",
+  "order_id": "order_id"
+}
+```
+
+##### 属性说明：
+
+| key      | 类型   | 描述       | 是否可为空 |
+| -------- | ------ | ---------- | ---------- |
+| user_id  | string | 买家用户ID | N          |
+| password | string | 用户密码   | N          |
+| order_id | string | 订单号     | N          |
+
+
+Status Code:
+
+| 码   | 描述     |
+| ---- | -------- |
+| 200  | 取消成功 |
+| 401  | 取消失败 |
+| 5XX  | 无效参数 |

@@ -163,7 +163,7 @@ def new_order():
                     id_goods = Goods.query.filter_by(store_id=store_id, book_id=book_id).first().goods_id
                     new_buy = Buy(id_now, item['count'], id_goods)
                     db.session.add(new_buy)
-                db.session.commit()
+                    db.session.commit()
                 db_m.history_order.insert_one({'order_id': id_now, 'buyer': user_id, 'store': store_id, 'goods': book,
                                                'total_amount': amount, 'state': 0})
                 resp = generate_resp_order(SUCCESS, id_now)

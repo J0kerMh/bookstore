@@ -17,11 +17,9 @@ from be.utils.token import *
 
 db = app.db
 User = app.User
-Order = app.Order
 Goods = app.Goods
 Store = app.Store
 Book = app.Book
-Buy = app.Buy
 Tag = app.tag
 
 
@@ -78,7 +76,8 @@ def add_book():
             pages = book_dir['pages']
             binding = book_dir['binding']
             isbn = book_dir['isbn']
-            new_book = Book(book_name,title,author,publisher,original_title,translator,pub_year,pages,binding,isbn)
+            new_book = Book(book_name, title, author, publisher, original_title, translator, pub_year,
+                            pages, binding, isbn)
             db.session.add(new_book)
             tags = book_dir['tags']
             new_tags = [Tag(i, book_name) for i in tags]
@@ -89,7 +88,7 @@ def add_book():
                 price = 0
             amount = json['stock_level']
             book_id = Book.query.filter_by(book_name=book_name).first().book_id
-            new_goods = Goods(book_id=book_id, store_id=store_id, storage=amount, prize=price)
+            new_goods = Goods(book_id=book_id, store_id=store_id, storage=amount, price=price)
             db.session.add(new_goods)
             db.session.commit()
             return generate_resp(SUCCESS, "book added")
@@ -102,7 +101,7 @@ def add_book():
                     price = 0
                 amount = json['stock_level']
                 book_id = Book.query.filter_by(book_name=book_name).first().book_id
-                new_gg = Goods(book_id=book_id,store_id=store_id,storage=amount,prize=price)
+                new_gg = Goods(book_id=book_id, store_id=store_id, storage=amount, price=price)
                 db.session.add(new_gg)
                 db.session.commit()
                 return generate_resp(SUCCESS, "store has been created")
@@ -110,7 +109,7 @@ def add_book():
                 return generate_resp(FAIL, 'book exist')
 
 
-@bp.route("add_stock_level",methods=['POST'])
+@bp.route("add_stock_level", methods=['POST'])
 def add_stock_level():
     json = request.json
     token = request.headers.get('token')

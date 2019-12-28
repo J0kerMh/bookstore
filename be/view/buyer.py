@@ -84,7 +84,6 @@ def payment():
                 # 修改用户余额，防止恶意购买
                 user.money = money_old - order_amount
                 buy = Buy.query.filter_by(order_id=order_id).all()
-                goods_id_store = Buy.query.filter_by(order_id=order_id).first().goods_id
                 for buy_ in buy:
                     goods_count = buy_.count
                     good_id = buy_.goods_id
@@ -95,10 +94,7 @@ def payment():
                     # 删除buy中相关条目
                     db.session.delete(buy_)
                 # db.session.delete(order)
-                store_id = Goods.query.filter_by(goods_id=goods_id_store).first().store_id
-                # print(store_id)
-                owner_id = Store.query.filter_by(store_id=store_id).first().user_id
-                # print(owner_id)
+                owner_id = Order.query.filter_by(order_id=order_id).first().seller_id
                 owner = User.query.filter_by(user_id=owner_id).first()
                 # 商铺加钱
                 owner_money = owner.money
@@ -149,10 +145,12 @@ def new_order():
                             return resp
                         else:
                             # 计算订单总价值
-                            amount = amount + book_temp.prize * item['count']
+                            amount = amount + book_temp.price * item['count']
                             continue
                 # 添加新订单
-                new_order_ = Order(user_id, amount, 10)
+                time_cur = float(time.time()) - 1577510400
+                seller_id = Store.query.filter_by(store_id=store_id).first().user_id
+                new_order_ = Order(user_id, amount, time_cur, seller_id)
                 db.session.add(new_order_)
                 db.session.commit()
                 id_now = Order.query.filter_by().order_by(Order.order_id.desc()).first().order_id
@@ -163,7 +161,7 @@ def new_order():
                     id_goods = Goods.query.filter_by(store_id=store_id, book_id=book_id).first().goods_id
                     new_buy = Buy(id_now, item['count'], id_goods)
                     db.session.add(new_buy)
-                    db.session.commit()
+                db.session.commit()
                 db_m.history_order.insert_one({'order_id': id_now, 'buyer': user_id, 'store': store_id, 'goods': book,
                                                'total_amount': amount, 'state': 0})
                 resp = generate_resp_order(SUCCESS, id_now)

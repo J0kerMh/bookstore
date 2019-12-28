@@ -40,3 +40,16 @@ class Buyer:
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         return r.status_code
+
+    def take_over_goods(self, order_id: str):
+        json = {"user_id": self.user_id, "password": self.password, "order_id": order_id}
+        url = urljoin(self.url_prefix, "take_over_goods")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code
+
+    def history_order(self):
+        url = urljoin(self.url_prefix, "history_order")
+        headers = {"token": self.token}
+        r = requests.get(url, headers=headers)
+        return r.status_code

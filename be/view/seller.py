@@ -13,8 +13,8 @@ import be as app
 from be.utils.config import *
 from be.utils.resp import generate_resp
 from be.utils.token import *
-
-
+from be.utils.mongo import *
+from be.index_retrieval.search import *
 
 db = app.db
 User = app.User
@@ -62,11 +62,11 @@ def add_book():
         seller_name=json['user_id']
         user=User.query.filter_by(user_id=seller_name).first()
         if user is None:
-            return generate_resp(FAIL,"no exising user")
+            return generate_resp(USER_NOT_EXIST,"no exising user")
         store_id=json['store_id']
         store=Store.query.filter_by(store_id=store_id).first()
         if store is None:
-            return generate_resp(FAIL,"no existing store")
+            return generate_resp(STORE_NOT_EXIST,"no existing store")
         book = Book.query.filter_by(book_name=book_name).first()
         if book is None:
             title =book_dir['title']
@@ -87,7 +87,16 @@ def add_book():
             price = book_dir['price']
             if price is None:
                 price = 0
-            amount = json['stock_level']
+            amount = book_dir['stock_level']
+            author_intro= book_dir["author_intro"]
+            book_intro = book_dir["book_intro"]
+            content = book_dir["content"]
+            picture=book_dir["picture"]
+            mongo_id = insert_book_Mongo(author_intro,book_intro,content,tags,picture)
+            tagsSpace=""
+            for i in tags:
+                tagsSpace+=i+" "
+            add_index(mongo_id.__str__(),author_intro,book_intro,content,tagsSpace.strip())
             book_id = Book.query.filter_by(book_name=book_name).first().book_id
             new_goods = Goods(book_id=book_id,store_id=store_id,storage=amount, prize=price)
             db.session.add(new_goods)
@@ -107,7 +116,7 @@ def add_book():
                 db.session.commit()
                 return generate_resp(SUCCESS, "store has been created")
             else:
-                return generate_resp(FAIL, 'book exist')
+                return generate_resp(BOOK_NOT_EXIST, 'book exist')
 
 
 @bp.route("add_stock_level",methods=['POST'])

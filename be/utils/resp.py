@@ -19,8 +19,17 @@ def generate_resp_order(code, message):
     resp.status_code = code
     return resp
 
+def generate_resp_store(code,store_list):
+    resp = jsonify(store_list=store_list)
+    resp.status_code = code
+    return resp
 
 def generate_resp_his_order(code, message):
     resp = jsonify(order=message)
+    resp.status_code = code
+    return resp
+
+def generate_resp_goods(code,goods_list):
+    resp = jsonify(goods_list=goods_list)
     resp.status_code = code
     return resp

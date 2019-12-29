@@ -33,3 +33,8 @@ def generate_resp_goods(code,goods_list):
     resp = jsonify(goods_list=goods_list)
     resp.status_code = code
     return resp
+
+def generate_resp_search(code,search_result):
+    resp = jsonify(search_result=search_result)
+    resp.status_code = code
+    return resp

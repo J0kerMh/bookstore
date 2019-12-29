@@ -38,7 +38,6 @@ def all_site_book_search():
         return generate_resp(FAIL, "token错误")
     search_context = json['search_context']
     store = Store.query.filter(Store.store_id.like('%'+search_context+'%')).all()
-
     return resp
 
 

@@ -92,10 +92,11 @@ def add_book():
             book_intro = book_dir["book_intro"]
             content = book_dir["content"]
             picture=book_dir["picture"]
-            mongo_id = insert_book_Mongo(author_intro,book_intro,content,tags,picture)
-            tagsSpace=""
+            tagsSpace = ""
             for i in tags:
-                tagsSpace+=i+" "
+                tagsSpace += i + " "
+            mongo_id = insert_book_Mongo(author_intro,book_intro,content,tagsSpace,picture)
+            print("MONGO!")
             add_index(mongo_id.__str__(),author_intro,book_intro,content,tagsSpace.strip())
             book_id = Book.query.filter_by(book_name=book_name).first().book_id
             new_goods = Goods(book_id=book_id, store_id=store_id, storage=amount, price=price)

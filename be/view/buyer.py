@@ -373,7 +373,7 @@ def search_by_param():
             goods=Goods.query.filter_by(book_id=book_id,store_id=store_id).first()
             if goods is not None:
                 book = Book.query.filter_by(book_id=book_id).first()
-                book_dir = book.__dir__
+                book_dir = genenrate_book_dir(book)
                 book_dir["content"] = find_content(i.get("Mongo_ID"))
                 bookList.append(book_dir)
         return generate_resp_search(SUCCESS,bookList)
@@ -395,7 +395,7 @@ def store_search():
             if  tempBook is None:
                 return generate_resp_search(SUCCESS,"not book matched")
             else:
-                result=[i.__dir__ for i in tempBook]
+                result=[genenrate_book_dir(i) for i in tempBook]
                 return generate_resp_search(SUCCESS,result)
         if para=="tags":
             searcher=search()
@@ -422,7 +422,7 @@ def store_search():
                     goods = Goods.query.filter_by(book_id=book_id,store_id=store_id).all()
                     if goods is not None:
                         book=Book.query.filter_by(book_id=book_id).first()
-                        result.append(book.__dir__)
+                        result.append(genenrate_book_dir(book))
                 return generate_resp_search(SUCCESS,result)
         if para=="tags":
             searcher=search()
@@ -437,5 +437,5 @@ def store_search():
                     goods = Goods.query.filter_by(book_id=book_id, store_id=store_id).all()
                     if goods is not None:
                         book = Book.query.filter_by(book_id=book_id).first()
-                        result.append(book.__dir__)
+                        result.append(genenrate_book_dir(book))
                 return generate_resp_search(SUCCESS,result)

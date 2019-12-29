@@ -34,7 +34,12 @@ def book_info(result):
     for i in result:
         book_id = i.get("book_id")
         book = Book.query.filter_by(book_id=book_id).first()
-        book_dir = book.__dir__
+        book_dir = genenrate_book_dir(book)
         book_dir["content"] = find_content(i.get("Mongo_ID"))
         bookList.append(book_dir)
     return bookList
+
+def genenrate_book_dir(book):
+    return {"book_name": book.book_name,"title":book.title,"author":book.author,"publisher":book.publisher,
+                   "original_title": book.original_title ,"translator":book.translator,"pub_year":book.pub_year,
+                   "pages":book.pages,"binding":book.binding,"isbn":book.isbn}

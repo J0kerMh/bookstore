@@ -24,8 +24,8 @@ class TestSearchByParam:
         ok, buy_book_id_list = gen_book.gen(non_exist_book_id=False, low_stock_level=False, max_book_count=5)
         assert ok
         self.buy_book_info_list = gen_book.buy_book_info_list
-        self.test_title = choice(gen_book.buy_book_info_list).title
-        self.test_tags = choice(gen_book.buy_book_info_list).tags
+        self.test_title = choice(gen_book.buy_book_info_list)[0].title
+        self.test_tags = choice(gen_book.buy_book_info_list)[0].tags
         self.buyer = register_new_buyer(self.buyer_id, self.password)
         yield
 

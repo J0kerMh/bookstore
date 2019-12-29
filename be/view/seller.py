@@ -93,8 +93,6 @@ def add_book():
             tagsSpace = ""
             for i in tags:
                 tagsSpace =tagsSpace+i+" "
-            print(tags)
-            print(tagsSpace)
             mongo_id=insert_book_Mongo(book_id,author_intro,book_intro, content, tagsSpace.strip(),picture)
             add_index(mongo_id.__str__(),book_id,author_intro, book_intro, content, tagsSpace.strip())
             new_goods = Goods(book_id=book_id, store_id=store_id, storage=amount, price=price)

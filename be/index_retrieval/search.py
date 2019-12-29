@@ -13,17 +13,15 @@ from jieba.analyse import ChineseAnalyzer
 from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
 from whoosh.index import create_in
-dirname = u"D:\whoosh"
+dirname ="index"
 command=("author_intro","book_intro","content","tags")
 def init_whoosh():
     CA = ChineseAnalyzer()
     schema = Schema(Mongo_ID=ID(stored=True), book_id=NUMERIC(stored=True),author_intro=TEXT(analyzer=CA), book_intro=TEXT(analyzer=CA),
                     content=TEXT(analyzer=CA), tags=KEYWORD)
-    """
     import os.path
-    if not os.path.exists("index"):
-        os.mkdir("index")
-    """
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
     create_in(dirname, schema)
 
 def add_index(Mongo_ID,book_id,author_intro, book_intro, content, tags):
@@ -48,7 +46,11 @@ class search:
 
     def search_index(self,command, input):
         parser = QueryParser(command, self.idx.schema)
-        myquery = parser.parse(input)
+        queryString=""
+        print(input)
+        for i in input:
+            queryString=queryString+str(i)+""
+        myquery = parser.parse(queryString.strip())
         results = self.searcher.search(myquery)
         return results
 

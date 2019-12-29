@@ -23,8 +23,8 @@ class TestSearchByKeywords:
         ok, buy_book_id_list = gen_book.gen(non_exist_book_id=False, low_stock_level=False, max_book_count=5)
         assert ok
         self.buy_book_info_list = gen_book.buy_book_info_list
-        content = choice(gen_book.buy_book_info_list).content
-        self.test_key_words = [content[i:i + 1] for i in range(2)]
+        content = choice(gen_book.buy_book_info_list)[0].content
+        self.test_key_words = [content[i:i+1] for i in range(2)]
         self.buyer = register_new_buyer(self.buyer_id, self.password)
         yield
 

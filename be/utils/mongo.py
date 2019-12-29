@@ -9,10 +9,32 @@
 2019/12/28 21:07   wycai      1.0         None
 '''
 import pymongo
-def insert_book_Mongo(author_intro,book_intro,content,tags,picture):
+from bson.objectid import ObjectId
+import be as app
+Book=app.Book
+
+def insert_book_Mongo(book_id,author_intro,book_intro,content,tags,picture):
     myclient = pymongo.MongoClient("mongodb://localhost:27017/")
     mydb = myclient["testrunning"]
     mycol = mydb["book"]
-    book ={"author_intro":author_intro, "book_intro":book_intro, "content": content,"tags":tags,"picture":picture}
+    book ={"book_id":book_id,"author_intro":author_intro, "book_intro":book_intro, "content": content,"tags":tags,"picture":picture}
     id=mycol.insert_one(book)
     return id.inserted_id
+
+def find_content(mongo_id):
+    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+    mydb = myclient["testrunning"]
+    mycol = mydb["book"]
+    id=ObjectId(mongo_id)
+    res = mycol.find({'_id':id})[0]
+    return res['content']
+
+def book_info(result):
+    bookList = []
+    for i in result:
+        book_id = i.get("book_id")
+        book = Book.query.filter_by(book_id=book_id).first()
+        book_dir = book.__dir__
+        book_dir["content"] = find_content(i.get("Mongo_ID"))
+        bookList.append(book_dir)
+    return bookList

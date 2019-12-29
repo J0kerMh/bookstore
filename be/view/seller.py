@@ -81,24 +81,22 @@ def add_book():
                             pages, binding, isbn)
             db.session.add(new_book)
             tags = book_dir['tags']
-            new_tags = [Tag(i, book_name) for i in tags]
-            db.session.add_all(new_tags)
-            db.session.commit()
             price = book_dir['price']
             if price is None:
                 price = 0
-            amount = book_dir['stock_level']
-            author_intro= book_dir["author_intro"]
+            amount = json['stock_level']
+            book_id = Book.query.filter_by(book_name=book_name).first().book_id
+            author_intro = book_dir["author_intro"]
             book_intro = book_dir["book_intro"]
             content = book_dir["content"]
-            picture=book_dir["picture"]
+            picture = book_dir["pictures"]
             tagsSpace = ""
             for i in tags:
-                tagsSpace += i + " "
-            mongo_id = insert_book_Mongo(author_intro,book_intro,content,tagsSpace,picture)
-            print("MONGO!")
-            add_index(mongo_id.__str__(),author_intro,book_intro,content,tagsSpace.strip())
-            book_id = Book.query.filter_by(book_name=book_name).first().book_id
+                tagsSpace =tagsSpace+i+" "
+            print(tags)
+            print(tagsSpace)
+            mongo_id=insert_book_Mongo(book_id,author_intro,book_intro, content, tagsSpace.strip(),picture)
+            add_index(mongo_id.__str__(),book_id,author_intro, book_intro, content, tagsSpace.strip())
             new_goods = Goods(book_id=book_id, store_id=store_id, storage=amount, price=price)
             db.session.add(new_goods)
             db.session.commit()

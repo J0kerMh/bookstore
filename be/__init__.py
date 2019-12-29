@@ -38,6 +38,7 @@ def create_app(test_config=None):
     from be.view import auth
     from be.view import buyer
     from be.view import seller
+    from be.view import search
     application.register_blueprint(auth.bp, url_prefix='/auth')
     application.register_blueprint(buyer.bp, url_prefix='/buyer')
     application.register_blueprint(seller.bp, url_prefix='/seller')

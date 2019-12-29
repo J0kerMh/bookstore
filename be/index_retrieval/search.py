@@ -8,18 +8,17 @@
 ------------      -------    --------    -----------
 2019/12/28 20:29   wycai      1.0         None
 '''
-from whoosh.fields import Schema, TEXT, ID,KEYWORD
+from whoosh.fields import Schema, TEXT, ID,KEYWORD,NUMERIC
 from jieba.analyse import ChineseAnalyzer
 from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
-
+from whoosh.index import create_in
 dirname = u"D:\whoosh"
 command=("author_intro","book_intro","content","tags")
 def init_whoosh():
     CA = ChineseAnalyzer()
-    schema = Schema(Mongo_ID=ID(stored=True), author_intro=TEXT(analyzer=CA), book_intro=TEXT(analyzer=CA),
+    schema = Schema(Mongo_ID=ID(stored=True), book_id=NUMERIC(stored=True),author_intro=TEXT(analyzer=CA), book_intro=TEXT(analyzer=CA),
                     content=TEXT(analyzer=CA), tags=KEYWORD)
-    from whoosh.index import create_in
     """
     import os.path
     if not os.path.exists("index"):
@@ -27,12 +26,12 @@ def init_whoosh():
     """
     create_in(dirname, schema)
 
-def add_index(Mongo_ID, author_intro, book_intro, content, tags):
+def add_index(Mongo_ID,book_id,author_intro, book_intro, content, tags):
     idx = open_dir(dirname=dirname)  # indexname 为索引名
-    with idx.writer() as writer:# IndexWriter对象
-        writer.add_document(Mongo_ID=Mongo_ID, author_intro=author_intro, book_intro=book_intro,
+    writer= idx.writer()# IndexWriter对象
+    writer.add_document(Mongo_ID=Mongo_ID,book_id=book_id,author_intro=author_intro, book_intro=book_intro,
                             content=content, tags=tags)
-        writer.commit()
+    writer.commit()
     idx.close()
 
 def test_add_index():

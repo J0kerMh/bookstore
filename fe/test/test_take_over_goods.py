@@ -19,7 +19,7 @@ class TestTakeOverGoods:
         self.password = self.seller_id
         gen_book = GenBook(self.seller_id, self.store_id)
         ok, buy_book_id_list = gen_book.gen(non_exist_book_id=False, low_stock_level=False, max_book_count=5)
-        buy_book_id_list, new_buy_book_list = buy_book_id_list[0:len(buy_book_id_list) / 2], buy_book_id_list[
+        buy_book_id_list, new_buy_book_id_list = buy_book_id_list[0:len(buy_book_id_list) / 2], buy_book_id_list[
                                                                                              len(buy_book_id_list) / 2:]
         self.buy_book_info_list = gen_book.buy_book_info_list
         assert ok
@@ -29,7 +29,7 @@ class TestTakeOverGoods:
         code, self.order_id = b.new_order(self.store_id, buy_book_id_list)
         assert code == 200
 
-        code1, self.order_id1 = b.new_order(self.store_id, new_buy_book_list)
+        code1, self.order_id1 = b.new_order(self.store_id, new_buy_book_id_list)
         assert code == 200
 
         self.total_price = 0

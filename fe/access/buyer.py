@@ -53,3 +53,17 @@ class Buyer:
         headers = {"token": self.token}
         r = requests.get(url, headers=headers)
         return r.status_code
+
+    def search_by_keywords(self, key_words: list, store_id=None):
+        json = {"store_id": store_id, "key_words": key_words}
+        url = urljoin(self.url_prefix, "search_by_keywords")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code
+
+    def search_by_param(self, param: str, value: str, store_id=None):
+        json = {"store_id": store_id, "param": param, "value": value}
+        url = urljoin(self.url_prefix, "search_by_param")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code

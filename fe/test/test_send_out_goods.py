@@ -21,8 +21,9 @@ class TestSendOutGoods:
         gen_book = GenBook(self.seller_id, self.store_id)
         self.seller = gen_book.seller
         ok, buy_book_id_list = gen_book.gen(non_exist_book_id=False, low_stock_level=False, max_book_count=5)
-        buy_book_id_list, new_buy_book_list = buy_book_id_list[0:len(buy_book_id_list) / 2], buy_book_id_list[
-                                                                                             len(buy_book_id_list) / 2:]
+        buy_book_id_list, new_buy_book_list = buy_book_id_list[0:int(len(buy_book_id_list) / 2)], buy_book_id_list[
+                                                                                                  int(len(
+                                                                                                      buy_book_id_list) / 2):]
         self.buy_book_info_list = gen_book.buy_book_info_list
         assert ok
         b = register_new_buyer(self.buyer_id, self.password)

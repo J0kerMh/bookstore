@@ -120,7 +120,11 @@ POST http://[address]/buyer/add_funds
 
 #### Request
 
+##### Header:
 
+key | 类型 | 描述 | 是否可为空
+---|---|---|---
+token | string | 登录产生的会话标识 | N
 
 ##### Body:
 ```json
@@ -139,6 +143,7 @@ user_id | string | 买家用户ID | N
 password | string | 用户密码 | N
 add_value | int | 充值金额，以分为单位 | N
 
+#### Response
 
 Status Code:
 
@@ -152,11 +157,15 @@ Status Code:
 
 #### URL：
 
-POST http://[address]/buyer/take_over_goods
+POST http://[address]/buyer/confirm
 
 #### Request
 
+##### Header:
 
+key | 类型 | 描述 | 是否可为空
+---|---|---|---
+token | string | 登录产生的会话标识 | N
 
 ##### Body:
 
@@ -174,47 +183,74 @@ POST http://[address]/buyer/take_over_goods
 | -------- | ------ | -------------------- | ---------- |
 | user_id  | string | 买家用户ID           | N          |
 | password | string | 用户密码             | N          |
-| order_id | int    | 充值金额，以分为单位 | N          |
+| order_id | int    | 订单号               | N          |
 
+#### Response
 
 Status Code:
 
 | 码   | 描述     |
 | ---- | -------- |
 | 200  | 签收成功 |
-| 401  | 签收失败 |
+| 401  | 授权失败 |
 | 5XX  | 无效参数 |
 
-## 买家查看所有历史订单
+## 买家按条件查看历史订单
 
 #### URL：
 
-GET http://[address]/buyer/history_order
+POST http://[address]/buyer/his_order
 
+
+
+#### Request
+
+##### Header:
+
+key | 类型 | 描述 | 是否可为空
+---|---|---|---
+token | string | 登录产生的会话标识 | N
+
+##### Body:
+
+```json
+{
+  "user_id": "user_id",
+  "password": "password",
+  "type": "type",
+  "context": "context"
+}
+```
+
+
+##### 属性说明：
+
+| key      | 类型   | 描述                 | 是否可为空 |
+| -------- | ------ | -------------------- | ---------- |
+| user_id  | string | 买家用户ID           | N          |
+| password | string | 用户密码             | N          |
+| type     | string | 筛选类型 | N          |
+| context | int/string| 筛选条件 | N          |
 
 
 #### Response
-
 
 Status Code:
 
 | 码   | 描述      |
 | ---- | --------- |
 | 200  | 查看成功  |
-| 401  | token错误 |
+| 401  | 授权失败 |
+| 5XX  | 无效参数 |
 
 ##### Body:
 
-```json
+```
 {
-  "orders": [
-    {
-      "order_id": "1000067"
-    },
-    {
-      "order_id": "1000134"
-    }
-  ]
+"order": [
+  "[{"_id": {"$oid": "5e07ef105879d6913b732b32"}, "order_id": 58, "buyer": "jyh", "store": "test", "goods": [{"id": 1009273, "count": 1}, {"id": 1013801, "count": 2}], "total_amount": 300, "state": 0}]",
+  "[{"_id": {"$oid": "5e07ef125879d6913b732b35"}, "order_id": 59, "buyer": "jyh", "store": "test", "goods": [{"id": 1009273, "count": 1}, {"id": 1013801, "count": 2}], "total_amount": 300, "state": 0}]"
+],
 }
 ```
 
@@ -222,13 +258,30 @@ Status Code:
 
 | 变量名 | 类型 | 描述                           | 是否可为空 |
 | ------ | ---- | ------------------------------ | ---------- |
-| orders | dict | 历史订单列表状态码为200时有效) | N          |
+| orders | array | 历史订单列表状态码为200时有效) | N          |
 
 orders数组：
 
 | 变量名   | 类型   | 描述       | 是否可为空 |
 | -------- | ------ | ---------- | ---------- |
-| order_id | string | 历史订单号 | N          |
+| order_id | int | 订单号 | N          |
+| buyer | string | 买家 | N          |
+| store | string | 店铺 | N          |
+| goods | array | 购买商品列表 | N          |
+| total_amount | int | 订单总额 | N          |
+| state | int | 当前订单状态 | N          |
+
+
+订单状态：
+
+|  状态表示  | 状态描述       |
+| -------- | ---------- |
+| 0 | 未付款 |
+| 1 | 已付款 |
+| 2 | 已取消 | 
+| 3 | 已完成 |
+| 4 | 已发货 |
+
 
 ## 买家取消订单
 
@@ -238,7 +291,11 @@ POST http://[address]/buyer/cancel_order
 
 #### Request
 
+##### Header:
 
+key | 类型 | 描述 | 是否可为空
+---|---|---|---
+token | string | 登录产生的会话标识 | N
 
 ##### Body:
 
@@ -258,83 +315,54 @@ POST http://[address]/buyer/cancel_order
 | password | string | 用户密码   | N          |
 | order_id | string | 订单号     | N          |
 
+#### Response
 
 Status Code:
 
 | 码   | 描述     |
 | ---- | -------- |
 | 200  | 取消成功 |
-| 401  | 取消失败 |
+| 401  | 授权失败 |
 | 5XX  | 无效参数 |
 
-## 买家通过参数查找图书
+## 卖家发货
 
 #### URL：
 
-POST http://[address]/buyer/search_by_param
+POST http://[address]/buyer/deliver
 
 #### Request
 
+##### Header:
 
+key | 类型 | 描述 | 是否可为空
+---|---|---|---
+token | string | 登录产生的会话标识 | N
 
 ##### Body:
 
 ```json
 {
-  "store_id": "store_id",
-  "param": "title(tag)",
-  "value": "content"
+  "user_id": "user_id",
+  "password": "password",
+  "order_id": "order_id"
 }
 ```
 
 ##### 属性说明：
 
-| key      | 类型   | 描述                | 是否可为空 |
-| -------- | ------ | ------------------- | ---------- |
-| store_id | string | 店铺ID              | Y          |
-| param    | string | 按照标题或者tag查询 | N          |
-| value    | string | 标题或者tag的内容   | N          |
+| key      | 类型   | 描述       | 是否可为空 |
+| -------- | ------ | ---------- | ---------- |
+| user_id  | string | 卖家用户ID | N          |
+| password | string | 用户密码   | N          |
+| order_id | string | 订单号     | N          |
 
-
-Status Code:
-
-| 码   | 描述     |
-| ---- | -------- |
-| 200  | 查询成功 |
-| 401  | 查询失败 |
-| 5XX  | 无效参数 |
-
-## 买家通过关键词查找图书
-
-#### URL：
-
-POST http://[address]/buyer/search_by_keywords
-
-#### Request
-
-
-
-##### Body:
-
-```json
-{
-  "store_id": "store_id",
-  "key_words": ["word1","word2"]
-}
-```
-
-##### 属性说明：
-
-| key       | 类型   | 描述   | 是否可为空 |
-| --------- | ------ | ------ | ---------- |
-| store_id  | string | 店铺ID | Y          |
-| key_words | list   | 关键词 | N          |
-
+#### Response
 
 Status Code:
 
 | 码   | 描述     |
 | ---- | -------- |
-| 200  | 查询成功 |
-| 401  | 查询失败 |
+| 200  | 发货成功 |
+| 401  | 授权失败 |
 | 5XX  | 无效参数 |

@@ -177,6 +177,7 @@ def new_order():
                     id_goods = Goods.query.filter_by(store_id=store_id, book_id=book_id).first().goods_id
                     new_buy = Buy(id_now, item['count'], id_goods)
                     db.session.add(new_buy)
+                    db_m.buy.insert_one({'order_id': id_now, 'book_name': item['id'], 'buyer': user_id})
                 db.session.commit()
                 db_m.history_order.insert_one({'order_id': id_now, 'buyer': user_id, 'store': store_id, 'goods': book,
                                                'total_amount': amount, 'state': UNPAID})
@@ -331,10 +332,17 @@ def his_order():
             resp = generate_resp(INVALID_PARAMETER, '密码错误')
         else:
             if type == "all":
-                resp = generate_resp_his_order(SUCCESS, dumps(db_m.history_order.find({'buyer': user_id}), ensure_ascii=False))
+                resp = generate_resp_his_order(SUCCESS, dumps(db_m.history_order.find({'buyer': user_id}),
+                                                              ensure_ascii=False))
             elif type == "store" or type == "total_amount" or type == "state":
                 resp = generate_resp_his_order(SUCCESS, dumps(db_m.history_order.find(
                     {"$and": [{type: context}, {'buyer': user_id}]}), ensure_ascii=False))
+            elif type == "goods":
+                temp = db_m.buy.find({"$and": [{'book_name': context}, {'buyer': user_id}]})
+                result = []
+                for entry in temp:
+                    result.append(dumps(db_m.history_order.find_one({'order_id': entry['order_id']}), ensure_ascii=False))
+                resp = generate_resp_his_order(SUCCESS, result)
             else:
                 resp = generate_resp(INVALID_PARAMETER, '字段错误')
     return resp

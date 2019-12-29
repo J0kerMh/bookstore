@@ -143,6 +143,7 @@ user_id | string | 买家用户ID | N
 password | string | 用户密码 | N
 add_value | int | 充值金额，以分为单位 | N
 
+#### Response
 
 Status Code:
 
@@ -184,6 +185,7 @@ token | string | 登录产生的会话标识 | N
 | password | string | 用户密码             | N          |
 | order_id | int    | 订单号               | N          |
 
+#### Response
 
 Status Code:
 
@@ -313,6 +315,7 @@ token | string | 登录产生的会话标识 | N
 | password | string | 用户密码   | N          |
 | order_id | string | 订单号     | N          |
 
+#### Response
 
 Status Code:
 
@@ -354,6 +357,7 @@ token | string | 登录产生的会话标识 | N
 | password | string | 用户密码   | N          |
 | order_id | string | 订单号     | N          |
 
+#### Response
 
 Status Code:
 

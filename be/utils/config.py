@@ -1,6 +1,6 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# @Author  : yhma
+# @Author  : yhma, hjcao
 # @contact: yhma.dev@outlook.com
 # @Time    : 2019/12/3 16:08
 # @File    : config.py

@@ -1,6 +1,6 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# @Author  : yhma
+# @Author  : yhma, hjcao
 # @contact: yhma.dev@outlook.com
 # @Time    : 2019/12/27 23:09
 
@@ -40,7 +40,7 @@ class TestCancelOrder:
         code = self.buyer.payment(self.order_id1)
         assert code == 200
         # 卖家发货
-        code = self.seller.send_out_goods(self.order_id1)
+        code = self.seller.deliver(self.order_id1)
         assert code == 200
         # 已付款未发货
         code = self.buyer.payment(self.order_id2)
@@ -70,5 +70,5 @@ class TestCancelOrder:
         assert code != 200
 
     def test_error_order_id(self):
-        code = self.buyer.cancel_order(self.order_id + "_x")
+        code = self.buyer.cancel_order(self.order_id + 1000000)
         assert code != 200

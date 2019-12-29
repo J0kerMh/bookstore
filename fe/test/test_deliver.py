@@ -1,6 +1,6 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# @Author  : yhma
+# @Author  : yhma, hjcao
 # @contact: yhma.dev@outlook.com
 # @Time    : 2019/12/27 23:08
 
@@ -21,9 +21,7 @@ class TestSendOutGoods:
         gen_book = GenBook(self.seller_id, self.store_id)
         self.seller = gen_book.seller
         ok, buy_book_id_list = gen_book.gen(non_exist_book_id=False, low_stock_level=False, max_book_count=5)
-        buy_book_id_list, new_buy_book_list = buy_book_id_list[0:int(len(buy_book_id_list) / 2)], buy_book_id_list[
-                                                                                                  int(len(
-                                                                                                      buy_book_id_list) / 2):]
+
         self.buy_book_info_list = gen_book.buy_book_info_list
         assert ok
         b = register_new_buyer(self.buyer_id, self.password)
@@ -32,14 +30,17 @@ class TestSendOutGoods:
         code, self.order_id = b.new_order(self.store_id, buy_book_id_list)
         assert code == 200
 
-        code1, self.order_id1 = b.new_order(self.store_id, new_buy_book_list)
+        code1, self.order_id1 = b.new_order(self.store_id, buy_book_id_list)
         assert code == 200
 
         self.total_price = 0
         for item in self.buy_book_info_list:
             book: Book = item[0]
             num = item[1]
-            self.total_price = self.total_price + book.price * num
+            if book.price is None:
+                continue
+            else:
+                self.total_price = self.total_price + book.price * num
         code = self.buyer.add_funds(self.total_price)
         assert code == 200
         code = self.buyer.payment(self.order_id)
@@ -47,13 +48,13 @@ class TestSendOutGoods:
         yield
 
     def test_ok(self):
-        code = self.seller.send_out_goods(self.order_id)
+        code = self.seller.deliver(self.order_id)
         assert code == 200
 
     def test_error_order_id(self):
-        code = self.seller.send_out_goods(self.order_id + "_x")
+        code = self.seller.deliver(self.order_id + 1000000)
         assert code != 200
 
     def test_error_order_state(self):
-        code = self.seller.send_out_goods(self.order_id1)
+        code = self.seller.deliver(self.order_id1)
         assert code != 200

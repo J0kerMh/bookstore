@@ -80,9 +80,8 @@ class Order(db.Model):
 
 class Buy(db.Model):
     __tablename__ = 'buy'
-    buy_id = db.Column(db.Integer, nullable=False, unique=True, primary_key=True, autoincrement=True)
-    order_id = db.Column(db.Integer, nullable=False)
-    goods_id = db.Column(db.Integer, nullable=False)
+    order_id = db.Column(db.Integer, nullable=False, primary_key=True)
+    goods_id = db.Column(db.Integer, nullable=False, primary_key=True)
     count = db.Column(db.Integer, nullable=False)
 
     def __init__(self, order_id, count, goods_id):

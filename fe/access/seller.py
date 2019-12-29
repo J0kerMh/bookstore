@@ -7,6 +7,7 @@ from fe.access.auth import Auth
 class Seller:
     def __init__(self, url_prefix, seller_id: str, password: str):
         self.url_prefix = urljoin(url_prefix, "seller/")
+        self.url_prefix1 = urljoin(url_prefix, "buyer/")
         self.seller_id = seller_id
         self.password = password
         self.terminal = "my terminal"
@@ -19,7 +20,7 @@ class Seller:
             "user_id": self.seller_id,
             "store_id": store_id,
         }
-        #print(simplejson.dumps(json))
+        # print(simplejson.dumps(json))
         url = urljoin(self.url_prefix, "create_store")
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
@@ -32,7 +33,7 @@ class Seller:
             "book_info": book_info.__dict__,
             "stock_level": stock_level
         }
-        #print(simplejson.dumps(json))
+        # print(simplejson.dumps(json))
         url = urljoin(self.url_prefix, "add_book")
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
@@ -45,15 +46,15 @@ class Seller:
             "book_id": book_id,
             "add_stock_level": add_stock_num
         }
-        #print(simplejson.dumps(json))
+        # print(simplejson.dumps(json))
         url = urljoin(self.url_prefix, "add_stock_level")
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         return r.status_code
 
-    def send_out_goods(self, order_id: str):
+    def deliver(self, order_id: str):
         json = {"user_id": self.seller_id, "password": self.password, "order_id": order_id}
-        url = urljoin(self.url_prefix, "send_out_goods")
+        url = urljoin(self.url_prefix1, "deliver")
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         return r.status_code

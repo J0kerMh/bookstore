@@ -243,7 +243,7 @@ Status Code:
 
 ##### Body:
 
-```json
+```
 {
 "order": [
   "[{"_id": {"$oid": "5e07ef105879d6913b732b32"}, "order_id": 58, "buyer": "jyh", "store": "test", "goods": [{"id": 1009273, "count": 1}, {"id": 1013801, "count": 2}], "total_amount": 300, "state": 0}]",

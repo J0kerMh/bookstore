@@ -1,3 +1,4 @@
+import logging
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -26,6 +27,17 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    this_path = os.path.dirname(__file__)
+    parent_path = os.path.dirname(this_path)
+    log_file = os.path.join(parent_path, "app.log")
+
+    logging.basicConfig(filename=log_file, level=logging.INFO)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(
+        "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s"
+    )
+    handler.setFormatter(formatter)
+    logging.getLogger().addHandler(handler)
     db.init_app(application)
 
     @application.route('/hello')
@@ -33,6 +45,9 @@ def create_app(test_config=None):
         db.create_all()
         return 'Hello, World!'
 
+    @application.route('/shutdown')
+    def hello():
+        return "Server shutting down..."
     # apply the blueprints to the application
     # TODO set buleprits
     from be.view import auth

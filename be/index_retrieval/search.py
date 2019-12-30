@@ -16,8 +16,8 @@ from whoosh.index import create_in
 import os.path
 
 
-make_dirname ="index"
-dir="index_retrieval/index"
+make_dirname ="D:\whoosh"
+dirname="D:\whoosh"
 command=("author_intro","book_intro","content","tags")
 def init_whoosh():
     CA = ChineseAnalyzer()

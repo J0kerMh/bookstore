@@ -31,6 +31,8 @@ def find_content(mongo_id):
 
 def book_info(result):
     bookList = []
+    if result is None:
+        return []
     for i in result:
         book_id = i.get("book_id")
         book = Book.query.filter_by(book_id=book_id).first()
@@ -40,6 +42,9 @@ def book_info(result):
     return bookList
 
 def genenrate_book_dir(book):
-    return {"book_name": book.book_name,"title":book.title,"author":book.author,"publisher":book.publisher,
+    if book is None:
+        return {}
+    else:
+        return {"book_name": book.book_name,"title":book.title,"author":book.author,"publisher":book.publisher,
                    "original_title": book.original_title ,"translator":book.translator,"pub_year":book.pub_year,
                    "pages":book.pages,"binding":book.binding,"isbn":book.isbn}

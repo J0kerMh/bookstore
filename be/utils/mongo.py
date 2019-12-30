@@ -14,16 +14,16 @@ import be as app
 Book=app.Book
 
 def insert_book_Mongo(book_id,author_intro,book_intro,content,tags,picture):
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-    mydb = myclient["testrunning"]
+    myclient = pymongo.MongoClient("mongodb://112.74.41.122:27017/")
+    mydb = myclient["bookstore"]
     mycol = mydb["book"]
     book ={"book_id":book_id,"author_intro":author_intro, "book_intro":book_intro, "content": content,"tags":tags,"picture":picture}
     id=mycol.insert_one(book)
     return id.inserted_id
 
 def find_content(mongo_id):
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-    mydb = myclient["testrunning"]
+    myclient = pymongo.MongoClient("mongodb://112.74.41.122:27017/")
+    mydb = myclient["bookstore"]
     mycol = mydb["book"]
     id=ObjectId(mongo_id)
     res = mycol.find({'_id':id})[0]

@@ -58,6 +58,7 @@ class Workload:
         self.time_new_order = 0
         self.time_payment = 0
         self.lock = threading.Lock()
+        logging.basicConfig(filename="load.log", level=logging.INFO)
 
     def to_seller_id_and_password(self, no: int) -> (str, str):
         return "seller_{}_{}".format(no, self.uuid), "password_seller_{}_{}".format(no, self.uuid)

@@ -88,8 +88,9 @@ def payment():
                     # 删除buy中相关条目
                     db.session.delete(buy_)
                 db.session.delete(order)
-                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': CANCELED}})
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': CANCELED,'consis_status':False}})
                 db.session.commit()
+                db_m.history_order.update_one({'order_id':order_id},{"$set": {'consis_status':True}})
                 return resp
             order_amount = order.amount
             # 钱是否够
@@ -115,8 +116,9 @@ def payment():
                 owner_money = owner.money
                 owner.money = owner_money + order_amount
                 order.state = PAID
-                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': PAID}})
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': PAID,'consis_status':False}})
                 db.session.commit()
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'consis_status': True}})
                 resp = generate_resp(SUCCESS, "ok")
     return resp
 
@@ -179,10 +181,12 @@ def new_order():
                     id_goods = Goods.query.filter_by(store_id=store_id, book_id=book_id).first().goods_id
                     new_buy = Buy(id_now, item['count'], id_goods)
                     db.session.add(new_buy)
-                    db_m.buy.insert_one({'order_id': id_now, 'book_name': item['id'], 'buyer': user_id})
-                db.session.commit()
+                    db_m.buy.insert_one({'order_id': id_now, 'book_name': item['id'], 'buyer': user_id,'consis_status':False})
                 db_m.history_order.insert_one({'order_id': id_now, 'buyer': user_id, 'store': store_id, 'goods': book,
-                                               'total_amount': amount, 'state': UNPAID})
+                                               'total_amount': amount, 'state': UNPAID,'consis_status':False})
+                db.session.commit()
+                db_m.buy.update({'order_id':id_now},{"$set": {'consis_status': True}})
+                db_m.history_order.update_one({'order_id': id_now}, {"$set": {'consis_status': True}})
                 resp = generate_resp_order(SUCCESS, id_now)
     return resp
 
@@ -216,6 +220,7 @@ def confirm_order():
                 db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': COMPLETED}})
                 db.session.delete(order)
                 db.session.commit()
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'consis_status': True}})
                 resp = generate_resp(SUCCESS, "ok")
     return resp
 
@@ -252,6 +257,7 @@ def cancel_order():
                     db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': CANCELED}})
                     db.session.delete(order)
                     db.session.commit()
+                    db_m.history_order.update_one({'order_id': order_id}, {"$set": {'consis_status': True}})
                     resp = generate_resp(SUCCESS, "ok")
                 elif order.state == PAID or order.state == DELIVERED:
                     # 修改用户金钱
@@ -259,6 +265,9 @@ def cancel_order():
                     order_amount = order.amount
                     user.money = money_old + order_amount
                     order_ = db_m.history_order.find_one({'order_id': order_id})
+                    if(order_['consis_status'] is False):
+                        state = Order.query.filter_by(order_id=order_id).first().state
+                        db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state':state,'consis_status': True}})
                     buy = order_['goods']
                     for buy_ in buy:
                         goods_count = buy_['count']
@@ -273,9 +282,10 @@ def cancel_order():
                     # 商铺扣钱
                     owner_money = owner.money
                     owner.money = owner_money - order_amount
-                    db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': CANCELED}})
+                    db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': CANCELED,'consis_status':False}})
                     db.session.delete(order)
                     db.session.commit()
+                    db_m.history_order.update_one({'order_id': order_id}, {"$set": {'consis_status': True}})
                     resp = generate_resp(SUCCESS, "ok")
     return resp
 
@@ -306,8 +316,9 @@ def deliver_order():
                 resp = generate_resp(INVALID_PARAMETER, '订单号错误')
             else:
                 order.state = DELIVERED
-                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': DELIVERED}})
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'state': DELIVERED,'consis_status':False}})
                 db.session.commit()
+                db_m.history_order.update_one({'order_id': order_id}, {"$set": {'consis_status': True}})
                 resp = generate_resp(SUCCESS, "ok")
     return resp
 
@@ -334,15 +345,19 @@ def his_order():
             resp = generate_resp(INVALID_PARAMETER, '密码错误')
         else:
             if type == "all":
-                resp = generate_resp_his_order(SUCCESS, dumps(db_m.history_order.find({'buyer': user_id}),
+                resp = generate_resp_his_order(SUCCESS, dumps(db_m.history_order.find({"$and": [{'buyer': user_id},{'consis_status':True}]}),
                                                               ensure_ascii=False))
             elif type == "store" or type == "total_amount" or type == "state":
                 resp = generate_resp_his_order(SUCCESS, dumps(db_m.history_order.find(
-                    {"$and": [{type: context}, {'buyer': user_id}]}), ensure_ascii=False))
+                    {"$and": [{type: context}, {'buyer': user_id},{'consis_status':True}]}), ensure_ascii=False))
             elif type == "goods":
-                temp = db_m.buy.find({"$and": [{'book_name': context}, {'buyer': user_id}]})
+                temp = db_m.buy.find({"$and": [{'book_name': context}, {'buyer': user_id},{'consis_status':True}]})
                 result = []
                 for entry in temp:
+                    if(db_m.history_order.find_one({'order_id': entry['order_id']})['consis_status'] is False):
+                        state = Order.query.filter_by(order_id=entry['order_id'], state=UNPAID, buyer_id=user_id).first().state
+                        db_m.history_order.update_one({'order_id': entry['order_id']}, {"$set": {'consis_status': True, 'state':state}})
+
                     result.append(dumps(db_m.history_order.find_one({'order_id': entry['order_id']}), ensure_ascii=False))
                 resp = generate_resp_his_order(SUCCESS, result)
             else:

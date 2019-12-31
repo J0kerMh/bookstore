@@ -3,9 +3,6 @@
 
 [助教项目链接](https://github.com/DaSE-DBMS/bookstore)
 
-
-(以得分为导向)
-
 下面是助教文档中列出的几点
 
 
@@ -51,7 +48,7 @@ blob数据（如图片和大段的文字描述）可以分离出来存其它NoSQ
 
 #TODO
 
-- [ ] 数据库设计
-- [ ] 格式规范(这一块我来做, 我先把auth写完)
-- [ ] 功能完善(auth, buyer, seller)
-- [ ] 测试
+- [x] 数据库设计
+- [x] 格式规范(这一块我来做, 我先把auth写完)
+- [x] 功能完善(auth, buyer, seller)
+- [x] 测试

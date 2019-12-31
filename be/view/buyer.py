@@ -172,8 +172,7 @@ def new_order():
                 seller_id = Store.query.filter_by(store_id=store_id).first().user_id
                 new_order_ = Order(user_id, amount, time_cur, seller_id)
                 db.session.add(new_order_)
-                db.session.commit()
-                id_now = Order.query.filter_by().order_by(Order.order_id.desc()).first().order_id
+                id_now = Order.query.filter_by().order_by(Order.order_id.desc()).first().order_id + 1
                 # print(id_now)
                 # 添加到Book表中
                 for item in book:
